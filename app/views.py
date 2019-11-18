@@ -1,7 +1,11 @@
 from django.shortcuts import render, redirect
 from app.models import Book, Transaction
 from django.contrib import messages
+from django.contrib.auth import login
 from django.utils import timezone
+from django.urls import reverse_lazy
+from app import forms
+from django.views.generic import FormView
 
 
 def home(request):
@@ -30,3 +34,14 @@ def return_book(request, id):
     else:
         messages.error(request, f"{book.title} by {book.author} is already here")
     return redirect("home")
+
+
+class SignUpView(FormView):
+    form_class = forms.SignUpForm
+    template_name = "auth/user_form.html"
+    success_url = reverse_lazy("home")
+
+    def form_valid(self, form):
+        user = form.signup()
+        login(self.request, user)
+        return super().form_valid(form)
